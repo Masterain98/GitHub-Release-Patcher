@@ -42,13 +42,13 @@ def get_repo_patch_by_friendly_name(friendly_name: str, channel: str):
                 "browser_download_url": select_sql_result[2],
                 "cache_time": select_sql_result[3]
             }
-            patch_info_memory_cache[friendly_name] = result_dict
+            patch_info_memory_cache[friendly_name+"/"+channel] = result_dict
             patch_info_memory_cache_update_time = int(time.time())
             return result_dict
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No patch found")
     else:
-        return patch_info_memory_cache[friendly_name]
+        return patch_info_memory_cache[friendly_name+"/"+channel]
 
 
 @router.get("/cn/{friendly_name}/{channel}", tags=["patch"])
@@ -86,10 +86,10 @@ def get_repo_cn_patch_by_friendly_name(friendly_name: str, channel: str):
                     "browser_download_url": select_sql_result[4],
                     "cache_time": select_sql_result[3]
                 }
-            cn_patch_info_memory_cache[friendly_name] = result_dict
+            cn_patch_info_memory_cache[friendly_name+"/"+channel] = result_dict
             cn_patch_info_memory_cache_update_time = int(time.time())
             return result_dict
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No patch found")
     else:
-        return cn_patch_info_memory_cache[friendly_name]
+        return cn_patch_info_memory_cache[friendly_name+"/"+channel]
