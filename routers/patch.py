@@ -17,6 +17,11 @@ cn_patch_info_memory_cache = {}
 cn_patch_info_memory_cache_update_time = int(time.time())
 
 
+@router.get("/", tags=["patch"])
+async def showing_patch_sys_msg():
+    return {"message": "Patch system is running, admin privilege is disabled in this level."}
+
+
 @router.get("/global/{friendly_name}/{channel}", tags=["patch"])
 def get_repo_patch_by_friendly_name(friendly_name: str, channel: str):
     global patch_info_memory_cache, patch_info_memory_cache_update_time
@@ -30,7 +35,7 @@ def get_repo_patch_by_friendly_name(friendly_name: str, channel: str):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid channel")
 
     if int(time.time()) - patch_info_memory_cache_update_time > MEMORY_CACHE_TIME or \
-            friendly_name not in patch_info_memory_cache.keys():
+            friendly_name+"/"+channel not in patch_info_memory_cache.keys():
         select_sql = r"SELECT tag_name, body, download_url, publish_time FROM patch_history WHERE " \
                      r"repo_id =(SELECT id FROM repo_list WHERE friendly_name = '%s' AND is_prerelease=%s) " \
                      r"ORDER BY publish_time DESC LIMIT 1" % (friendly_name, channel_code)
@@ -64,7 +69,7 @@ def get_repo_cn_patch_by_friendly_name(friendly_name: str, channel: str):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid channel")
 
     if int(time.time()) - cn_patch_info_memory_cache_update_time > MEMORY_CACHE_TIME or \
-            friendly_name not in cn_patch_info_memory_cache.keys():
+            friendly_name+"/"+channel not in cn_patch_info_memory_cache.keys():
         select_sql = r"SELECT p.tag_name, p.body, c.cn_url, p.publish_time, p.download_url " \
                      r"FROM patch_history p LEFT JOIN cn_boost_patch c ON p.repo_id = c.repo_id " \
                      r"INNER JOIN repo_list r ON p.repo_id = r.id " \
